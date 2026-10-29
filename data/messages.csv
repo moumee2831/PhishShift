@@ -1,0 +1,9 @@
+message,label
+"Your bank account will be blocked. Verify your details immediately.",phishing
+"Congratulations! You have won a free prize. Claim it now.",phishing
+"Your password expires today. Click the link to verify your account.",phishing
+"Urgent action required to avoid account suspension.",phishing
+"Hi, are we still meeting at 5 PM today?",legitimate
+"Please find the meeting notes attached.",legitimate
+"Thank you for your help with the assignment.",legitimate
+"Your class starts at 9 AM tomorrow.",legitimate

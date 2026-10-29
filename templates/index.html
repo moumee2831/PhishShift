@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishShift AI | Message Risk Scanner</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #090d18;
+            color: #edf2ff;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 245px;
+            background: #0d1322;
+            border-right: 1px solid #202a40;
+            padding: 28px 18px;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: bold;
+            color: #a78bfa;
+            margin-bottom: 8px;
+        }
+
+        .brand span {
+            color: #22d3ee;
+        }
+
+        .tagline {
+            color: #8290aa;
+            font-size: 12px;
+            margin-bottom: 38px;
+        }
+
+        .nav-title {
+            font-size: 11px;
+            color: #71809b;
+            margin: 22px 10px 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 13px 12px;
+            margin: 7px 0;
+            border-radius: 9px;
+            color: #b5c0d6;
+            font-size: 14px;
+        }
+
+        .nav-item.active {
+            background: #201b3e;
+            color: #c4b5fd;
+            border: 1px solid #51418c;
+        }
+
+        .sidebar-note {
+            margin-top: 45px;
+            padding: 14px;
+            background: #111c2b;
+            border: 1px solid #24364b;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #93a4bd;
+            line-height: 1.7;
+        }
+
+        .online {
+            color: #34d399;
+            font-weight: bold;
+        }
+
+        .main {
+            flex: 1;
+            padding: 30px;
+            min-width: 0;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .topbar h1 {
+            font-size: 27px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #8c9bb5;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .badge {
+            border: 1px solid #235d55;
+            background: #102a2a;
+            color: #5eead4;
+            padding: 10px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 17px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: #111827;
+            border: 1px solid #263248;
+            border-radius: 15px;
+            padding: 22px;
+        }
+
+        .stat-label {
+            color: #9ba9c0;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .stat-value {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .stat-foot {
+            font-size: 12px;
+            color: #7d8ca6;
+            margin-top: 10px;
+        }
+
+        .purple {
+            color: #c4b5fd;
+        }
+
+        .red {
+            color: #fb7185;
+        }
+
+        .green {
+            color: #6ee7b7;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.9fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        .card-heading {
+            font-size: 17px;
+            margin-bottom: 8px;
+        }
+
+        .card-description {
+            color: #8795ad;
+            font-size: 12px;
+            line-height: 1.6;
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: #cbd5e1;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 190px;
+            resize: vertical;
+            background: #090f1d;
+            border: 1px solid #35425a;
+            border-radius: 10px;
+            padding: 15px;
+            color: #f1f5f9;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.7;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 2px #8b5cf622;
+        }
+
+        textarea::placeholder {
+            color: #64748b;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 9px;
+            padding: 13px 17px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .primary-btn {
+            background: linear-gradient(100deg, #8b5cf6, #6366f1);
+            color: white;
+            flex: 1;
+        }
+
+        .primary-btn:hover {
+            opacity: 0.9;
+        }
+
+        .primary-btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .secondary-btn {
+            background: #202b40;
+            color: #cbd5e1;
+            border: 1px solid #35425a;
+        }
+
+        .message {
+            margin-top: 15px;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .result-box {
+            display: none;
+            margin-top: 22px;
+            padding: 18px;
+            background: #0a1220;
+            border: 1px solid #2a3a52;
+            border-radius: 12px;
+        }
+
+        .result-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .risk-pill {
+            display: inline-block;
+            padding: 7px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .risk-high {
+            color: #fda4af;
+            background: #451b2a;
+        }
+
+        .risk-medium {
+            color: #fcd34d;
+            background: #403016;
+        }
+
+        .risk-low {
+            color: #6ee7b7;
+            background: #12352d;
+        }
+
+        .score {
+            font-size: 29px;
+            font-weight: bold;
+        }
+
+        .progress {
+            height: 8px;
+            background: #273248;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 12px 0 20px;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #a78bfa, #fb7185);
+            transition: width 0.4s ease;
+        }
+
+        .warning-list {
+            list-style: none;
+            margin-top: 12px;
+        }
+
+        .warning-list li {
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 8px;
+            background: #1a2435;
+            color: #d7e0ef;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .warning-list li::before {
+            content: "⚠  ";
+            color: #fbbf24;
+        }
+
+        .empty-warning {
+            color: #93a4bd;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .section {
+            margin-top: 22px;
+        }
+
+        .history-item {
+            padding: 13px 0;
+            border-bottom: 1px solid #263248;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-name {
+            color: #dbe5f5;
+            overflow-wrap: anywhere;
+        }
+
+        .history-label {
+            margin-top: 5px;
+            color: #8190a8;
+        }
+
+        .small-pill {
+            font-size: 11px;
+            padding: 6px 8px;
+            border-radius: 15px;
+            white-space: nowrap;
+        }
+
+        .disclaimer {
+            color: #7e8ca5;
+            font-size: 11px;
+            line-height: 1.7;
+            margin-top: 20px;
+        }
+
+        footer {
+            color: #65738b;
+            font-size: 11px;
+            text-align: center;
+            margin-top: 28px;
+            padding-bottom: 10px;
+        }
+
+        @media (max-width: 950px) {
+            .sidebar {
+                width: 190px;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .layout {
+                display: block;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 18px;
+            }
+
+            .tagline {
+                margin-bottom: 15px;
+            }
+
+            .nav-title,
+            .sidebar-note {
+                display: none;
+            }
+
+            .nav-item {
+                display: inline-block;
+                margin: 3px;
+                padding: 10px;
+            }
+
+            .main {
+                padding: 18px;
+            }
+
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .topbar h1 {
+                font-size: 23px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">Phish<span>Shift</span> AI</div>
+        <div class="tagline">Message Risk Intelligence</div>
+
+        <div class="nav-title">Workspace</div>
+        <div class="nav-item active">◈ &nbsp; Message Scanner</div>
+        <div class="nav-item">⌕ &nbsp; Message X-Ray</div>
+        <div class="nav-item">▤ &nbsp; Threat Intelligence</div>
+        <div class="nav-item">⟳ &nbsp; Robustness Lab</div>
+
+        <div class="nav-title">System</div>
+        <div class="nav-item">◎ &nbsp; Model Status</div>
+
+        <div class="sidebar-note">
+            <div class="online">● Scanner interface online</div>
+            <div>Local Flask application</div>
+            <div>Model status must be verified by scanning a message.</div>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <div>
+                <h1>Message Risk Scanner</h1>
+                <p class="subtitle">
+                    Analyze suspicious emails and SMS messages with your trained ML model.
+                </p>
+            </div>
+            <div class="badge">● LOCAL DASHBOARD</div>
+        </header>
+
+        <section class="stats">
+            <div class="card">
+                <div class="stat-label">Total Messages Scanned</div>
+                <div class="stat-value purple" id="totalScans">0</div>
+                <div class="stat-foot">Scans in this running session</div>
+            </div>
+
+            <div class="card">
+                <div class="stat-label">Phishing Predictions</div>
+                <div class="stat-value red" id="phishingCount">0</div>
+                <div class="stat-foot">Messages classified as phishing</div>
+            </div>
+
+            <div class="card">
+                <div class="stat-label">Legitimate Predictions</div>
+                <div class="stat-value green" id="legitimateCount">0</div>
+                <div class="stat-foot">Messages classified as legitimate</div>
+            </div>
+        </section>
+
+        <section class="content-grid">
+
+            <div>
+                <div class="card">
+                    <h2 class="card-heading">✉ Scan a Message</h2>
+                    <p class="card-description">
+                        Paste the email or SMS text below. The trained model will classify it
+                        and the scanner will check for selected warning signs.
+                    </p>
+
+                    <label for="messageInput">Message content</label>
+
+                    <textarea
+                        id="messageInput"
+                        placeholder="Example: Your account will be blocked. Verify your details immediately..."
+                    ></textarea>
+
+                    <div class="button-row">
+                        <button class="primary-btn" id="scanButton" onclick="scanMessage()">
+                            ◈ Analyze Message
+                        </button>
+                        <button class="secondary-btn" onclick="clearMessage()">
+                            Clear
+                        </button>
+                    </div>
+
+                    <div id="statusMessage" class="message" role="status"></div>
+
+                    <div class="result-box" id="resultBox">
+                        <div class="result-top">
+                            <div>
+                                <div class="stat-label">Model Prediction</div>
+                                <h3 id="predictionText">Waiting for result</h3>
+                            </div>
+                            <span class="risk-pill" id="riskPill">Unknown</span>
+                        </div>
+
+                        <div class="stat-label">Rule-based warning score</div>
+                        <div class="score" id="riskScore">0/100</div>
+
+                        <div class="progress">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+
+                        <h3 class="card-heading">Message X-Ray</h3>
+                        <p class="card-description">
+                            Warning signs detected by the dashboard's text rules.
+                            These are not explanations generated by the ML model.
+                        </p>
+
+                        <ul class="warning-list" id="warningList"></ul>
+
+                        <p class="disclaimer">
+                            This result is an automated estimate, not a guarantee.
+                            Verify suspicious messages independently. A low warning score
+                            does not mean a message is safe.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card section">
+                    <h2 class="card-heading">◉ Threat Intelligence</h2>
+                    <p class="card-description">
+                        Recent predictions from the current application session.
+                    </p>
+                    <div id="historyList">
+                        <p class="empty-warning">
+                            No messages scanned yet. Analyze a message to begin.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h2 class="card-heading">⚡ How the Scanner Works</h2>
+                    <p class="card-description">
+                        Your current project pipeline.
+                    </p>
+
+                    <div class="history-item">
+                        <span>01 &nbsp; Message Input</span>
+                        <span class="small-pill risk-low">Ready</span>
+                    </div>
+
+                    <div class="history-item">
+                        <span>02 &nbsp; TF-IDF + ML Model</span>
+                        <span class="small-pill risk-medium">On scan</span>
+                    </div>
+
+                    <div class="history-item">
+                        <span>03 &nbsp; Warning Sign Checks</span>
+                        <span class="small-pill risk-low">On scan</span>
+                    </div>
+
+                    <div class="history-item">
+                        <span>04 &nbsp; Risk Summary</span>
+                        <span class="small-pill risk-medium">On scan</span>
+                    </div>
+                </div>
+
+                <div class="card section">
+                    <h2 class="card-heading">🛡 Security Notes</h2>
+                    <p class="card-description">
+                        Keep these points in mind when interpreting results.
+                    </p>
+
+                    <ul class="warning-list">
+                        <li>Phishing prediction comes from the trained classifier.</li>
+                        <li>The warning score is based on simple text rules, not model confidence.</li>
+                        <li>The current eight-message sample is for setup testing only.</li>
+                        <li>Reliable performance requires a larger, representative test dataset.</li>
+                    </ul>
+                </div>
+
+                <div class="card section">
+                    <h2 class="card-heading">Model Information</h2>
+                    <p class="card-description">
+                        Model file expected by the Flask backend:
+                    </p>
+                    <code style="color:#c4b5fd; font-size:12px; overflow-wrap:anywhere;">
+                        models/phishshift_model.pkl
+                    </code>
+                    <p class="disclaimer">
+                        If scanning reports that the model is not loaded, check that the
+                        model file exists at this path and restart the Flask application.
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <footer>
+            PhishShift AI · Educational cybersecurity project · Local development
+        </footer>
+
+    </main>
+</div>
+
+<script>
+    async function scanMessage() {
+        const input = document.getElementById("messageInput");
+        const button = document.getElementById("scanButton");
+        const status = document.getElementById("statusMessage");
+        const message = input.value.trim();
+
+        if (!message) {
+            status.style.color = "#fda4af";
+            status.textContent = "Please enter a message before scanning.";
+            input.focus();
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Analyzing...";
+        status.style.color = "#a5b4fc";
+        status.textContent = "Sending message to the Flask model...";
+        document.getElementById("resultBox").style.display = "none";
+
+        try {
+            const response = await fetch("/api/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "The scan request failed.");
+            }
+
+            showResult(data);
+            status.style.color = "#6ee7b7";
+            status.textContent = "Analysis completed.";
+
+            await loadStats();
+
+        } catch (error) {
+            status.style.color = "#fda4af";
+            status.textContent =
+                error.message || "Could not connect to the Flask backend.";
+        } finally {
+            button.disabled = false;
+            button.textContent = "◈ Analyze Message";
+        }
+    }
+
+    function showResult(data) {
+        document.getElementById("resultBox").style.display = "block";
+
+        const prediction = String(data.prediction || "unknown").toLowerCase();
+        const riskLevel = String(data.risk_level || "Unknown");
+        const warnings = Array.isArray(data.warnings) ? data.warnings : [];
+
+        const predictionText = document.getElementById("predictionText");
+        const riskPill = document.getElementById("riskPill");
+
+        if (prediction === "phishing") {
+            predictionText.textContent = "Phishing";
+            predictionText.style.color = "#fb7185";
+        } else if (prediction === "legitimate") {
+            predictionText.textContent = "Legitimate";
+            predictionText.style.color = "#6ee7b7";
+        } else {
+            predictionText.textContent = prediction;
+            predictionText.style.color = "#fcd34d";
+        }
+
+        riskPill.textContent = riskLevel;
+        riskPill.className = "risk-pill";
+
+        if (riskLevel.toLowerCase().includes("high")) {
+            riskPill.classList.add("risk-high");
+        } else if (riskLevel.toLowerCase().includes("caution")) {
+            riskPill.classList.add("risk-medium");
+        } else {
+            riskPill.classList.add("risk-low");
+        }
+
+        const score = Math.max(0, Math.min(100, Number(data.risk_score) || 0));
+
+        document.getElementById("riskScore").textContent = score + "/100";
+        document.getElementById("progressBar").style.width = score + "%";
+
+        const warningList = document.getElementById("warningList");
+        warningList.replaceChildren();
+
+        if (warnings.length === 0) {
+            const item = document.createElement("li");
+            item.textContent = "No configured warning patterns were detected. This does not prove the message is safe.";
+            item.style.listStyle = "none";
+            warningList.appendChild(item);
+        } else {
+            warnings.forEach(function(warning) {
+                const item = document.createElement("li");
+                item.textContent = String(warning);
+                warningList.appendChild(item);
+            });
+        }
+    }
+
+    async function loadStats() {
+        try {
+            const response = await fetch("/api/stats");
+
+            if (!response.ok) {
+                return;
+            }
+
+            const data = await response.json();
+
+            document.getElementById("totalScans").textContent =
+                data.total_scans ?? 0;
+
+            document.getElementById("phishingCount").textContent =
+                data.phishing_count ?? 0;
+
+            document.getElementById("legitimateCount").textContent =
+                data.legitimate_count ?? 0;
+
+            renderHistory(data.recent_scans || []);
+
+        } catch (error) {
+            console.log("Stats could not be loaded:", error);
+        }
+    }
+
+    function renderHistory(history) {
+        const container = document.getElementById("historyList");
+        container.replaceChildren();
+
+        if (!history.length) {
+            const empty = document.createElement("p");
+            empty.className = "empty-warning";
+            empty.textContent = "No messages scanned yet. Analyze a message to begin.";
+            container.appendChild(empty);
+            return;
+        }
+
+        history.forEach(function(item, index) {
+            const row = document.createElement("div");
+            row.className = "history-item";
+
+            const left = document.createElement("div");
+
+            const title = document.createElement("div");
+            title.className = "history-name";
+            title.textContent = "Scan #" + (history.length - index);
+
+            const detail = document.createElement("div");
+            detail.className = "history-label";
+            detail.textContent =
+                String(item.prediction || "unknown") +
+                " · Rule score: " + (item.risk_score ?? 0) + "/100";
+
+            left.appendChild(title);
+            left.appendChild(detail);
+
+            const pill = document.createElement("span");
+            pill.className = "small-pill " +
+                (String(item.prediction).toLowerCase() === "phishing"
+                    ? "risk-high"
+                    : "risk-low");
+
+            pill.textContent = String(item.prediction || "unknown");
+
+            row.appendChild(left);
+            row.appendChild(pill);
+            container.appendChild(row);
+        });
+    }
+
+    function clearMessage() {
+        document.getElementById("messageInput").value = "";
+        document.getElementById("statusMessage").textContent = "";
+        document.getElementById("resultBox").style.display = "none";
+        document.getElementById("messageInput").focus();
+    }
+
+    loadStats();
+</script>
+</body>
+</html>
